@@ -28,7 +28,7 @@ class WalletView(APIView):
     def get(self, request, format=None):
         token = request.headers.get('Authorization').split(
         )[1] if request.headers.get('Authorization').split()[1] else ''
-        token, create_at = Token.objects.get_or_create(key=token)
+        token = Token.objects.filter(key=token).first()
         customer = Customer.objects.filter(id=token.user_id).first()
         if not customer:
             return Response({'message': 'Customer not found'},
@@ -101,7 +101,7 @@ class WalletView(APIView):
 
         token = request.headers.get('Authorization').split(
         )[1] if request.headers.get('Authorization').split()[1] else ''
-        token, create_at = Token.objects.filter(key=token).first()
+        token = Token.objects.filter(key=token).first()
         customer = Customer.objects.filter(id=token.user_id).first()
         if not customer:
             return Response({'message': 'Customer not found'},
@@ -139,7 +139,7 @@ class DepositView(APIView):
     def post(self, request, format=None):
         token = request.headers.get('Authorization').split(
         )[1] if request.headers.get('Authorization').split()[1] else ''
-        token, create_at = Token.objects.get_or_create(key=token)
+        token = Token.objects.filter(key=token).first()
         amount = request.POST.get('amount')
         reference_id = request.POST.get('reference_id')
         if not amount or not reference_id:
@@ -205,7 +205,7 @@ class WithdrawalView(APIView):
 
         token = request.headers.get('Authorization').split(
         )[1] if request.headers.get('Authorization').split()[1] else ''
-        token, create_at = Token.objects.get_or_create(key=token)
+        token = Token.objects.filter(key=token).first()
 
         customer = Customer.objects.get(id=token.user_id)
         withdrawn_exist = Withdrawal.objects.filter(
