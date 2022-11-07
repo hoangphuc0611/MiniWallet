@@ -37,6 +37,9 @@ class WalletView(APIView):
         if not wallet:
             return Response({'message': 'Wallet not found'},
                             status=status.HTTP_404_NOT_FOUND)
+        elif wallet.status != 'enabled':
+            return Response({'message': 'Wallet is not enabled'},
+                            status=status.HTTP_403_FORBIDDEN)
         content = {
             "status": "success",
             "data": {
@@ -164,9 +167,9 @@ class DepositView(APIView):
         if not wallet:
             return Response({'message': 'Wallet not found'},
                             status=status.HTTP_404_NOT_FOUND)
-        if wallet.status != 'enabled':
-            return Response({'message': "Wallet hasn't enable yet"},
-                            status=status.HTTP_400_BAD_REQUEST)
+        elif wallet.status != 'enabled':
+            return Response({'message': 'Wallet is not enabled'},
+                            status=status.HTTP_403_FORBIDDEN)
 
         wallet.balance += int(amount)
         wallet.save()
@@ -221,9 +224,12 @@ class WithdrawalView(APIView):
             return Response({'message': 'Wallet not found'},
                             status=status.HTTP_404_NOT_FOUND)
         if wallet.status != 'enabled':
-            return Response({'message': "Wallet hasn't enable yet"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Wallet is not enabled'},
+                            status=status.HTTP_403_FORBIDDEN)
         wallet.balance -= int(amount)
+        if wallet.balance < 0:
+            return Response({'message': "The amount being used must not be more than the current balance"},
+                            status=status.HTTP_400_BAD_REQUEST)
         wallet.save()
         content = {
             "status": "success",
