@@ -84,7 +84,7 @@ class WalletView(APIView):
                 }
             }
         }
-        return Response(content,status=status.HTTP_200_OK)
+        return Response(content, status=status.HTTP_200_OK)
 
     def patch(self, request, format=None):
         is_disabled = request.POST.get('is_disabled')
@@ -130,7 +130,7 @@ class WalletView(APIView):
                 }
             }
         }
-        return Response(content,status=status.HTTP_200_OK)
+        return Response(content, status=status.HTTP_200_OK)
 
 
 class DepositView(APIView):
@@ -159,10 +159,7 @@ class DepositView(APIView):
         if deposit_exits:
             return Response({'message': 'reference_id existed'},
                             status=status.HTTP_400_BAD_REQUEST)
-        deposit = Deposit.objects.create(deposited_by=customer,
-                                         status='success',
-                                         amount=amount,
-                                         reference_id=reference_id)[0]
+
         wallet = Wallet.objects.filter(owned_by=customer).first()
         if not wallet:
             return Response({'message': 'Wallet not found'},
@@ -173,6 +170,10 @@ class DepositView(APIView):
 
         wallet.balance += int(amount)
         wallet.save()
+        deposit = Deposit.objects.create(deposited_by=customer,
+                                         status='success',
+                                         amount=amount,
+                                         reference_id=reference_id)
         content = {
             "status": "success",
             "data": {
@@ -186,7 +187,7 @@ class DepositView(APIView):
                 }
             }
         }
-        return Response(content,status=status.HTTP_200_OK)
+        return Response(content, status=status.HTTP_200_OK)
 
 
 class WithdrawalView(APIView):
@@ -214,11 +215,6 @@ class WithdrawalView(APIView):
             return Response({'message': 'reference_id existed'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        withdrawn = Withdrawal.objects.create(withdrawn_by=customer,
-                                              status='success',
-                                              amount=amount,
-                                              reference_id=reference_id)
-
         wallet = Wallet.objects.filter(owned_by=customer).first()
         if not wallet:
             return Response({'message': 'Wallet not found'},
@@ -228,9 +224,17 @@ class WithdrawalView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
         wallet.balance -= int(amount)
         if wallet.balance < 0:
-            return Response({'message': "The amount being used must not be more than the current balance"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'message':
+                    "The amount being used must not be more than the current balance"
+                },
+                status=status.HTTP_400_BAD_REQUEST)
         wallet.save()
+        withdrawn = Withdrawal.objects.create(withdrawn_by=customer,
+                                              status='success',
+                                              amount=amount,
+                                              reference_id=reference_id)
         content = {
             "status": "success",
             "data": {
@@ -244,4 +248,4 @@ class WithdrawalView(APIView):
                 }
             }
         }
-        return Response(content, status=status)
+        return Response(content, status=status.HTTP_200_OK)
