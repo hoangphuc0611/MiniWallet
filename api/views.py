@@ -84,7 +84,7 @@ class WalletView(APIView):
                 }
             }
         }
-        return Response(content)
+        return Response(content,status=status.HTTP_200_OK)
 
     def patch(self, request, format=None):
         is_disabled = request.POST.get('is_disabled')
@@ -130,7 +130,7 @@ class WalletView(APIView):
                 }
             }
         }
-        return Response(content)
+        return Response(content,status=status.HTTP_200_OK)
 
 
 class DepositView(APIView):
@@ -186,7 +186,7 @@ class DepositView(APIView):
                 }
             }
         }
-        return Response(content)
+        return Response(content,status=status.HTTP_200_OK)
 
 
 class WithdrawalView(APIView):
